@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atharv Shete: Modern Portfolio</title>
+    <!-- Tailwind CSS with custom color configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'joyful-yellow': '#FFB54A',
+                        'joyful-teal': '#2EC4B6',
+                        'joyful-coral': '#FF6F61',
+                        'joyful-cream': '#F8F4E3',
+                        'joyful-deep-blue': '#1A535C',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- AOS Animate On Scroll CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Application Structure Plan: A single-page application with a sleek, sticky top navigation. Content is divided into distinct, visually separated sections: "Introduction" (Summary), "Skills & Expertise" (Skills), "Projects & Experience" (Experience), and "Education & Certifications" (Education/Certifications). This structure promotes clear information hierarchy and intuitive navigation, allowing users to effortlessly browse different aspects of the portfolio. Interactive elements like the skill chart and expandable project details enhance engagement and information accessibility. -->
+    <!-- Visualization & Content Choices:
+        - Report Info: Technical Skills (Languages, Microcontrollers, Tools). Goal: Inform/Organize/Compare proficiency. Viz: Horizontal Bar Chart (Chart.js) with modern styling. Interaction: Tooltips on hover show details. Justification: Provides a clear, professional visual representation of technical strengths.
+        - Report Info: Projects & Experience. Goal: Inform/Organize details. Method: Accordion (HTML/JS) for concise project/experience summaries. Interaction: Click to expand/collapse. Justification: Maintains a clean layout, preventing information overload while allowing deep dives into specific achievements.
+        - Report Info: Summary, Education, Certifications, Extra-Curricular. Goal: Inform. Method: Clean, well-structured text blocks (HTML/Tailwind) within distinct cards or sections. Interaction: None beyond navigation. Justification: Ensures readability and a polished presentation of foundational information.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.light {
+            background: linear-gradient(135deg, #F8F4E3 0%, #FF6F61 100%); /* joyful-cream to joyful-coral */
+            color: #1A535C; /* joyful-deep-blue for primary text */
+        }
+        body.dark {
+            background: linear-gradient(135deg, #1A535C 0%, #2EC4B6 100%); /* joyful-deep-blue to joyful-teal */
+            color: #F8F4E3; /* joyful-cream for primary text */
+        }
+        .font-heading {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .nav-link {
+            transition: color 0.3s, background-color 0.3s, border-radius 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0%;
+            height: 3px;
+            background-color: #FFB54A; /* joyful-yellow */
+            transition: width 0.3s ease-out, left 0.3s ease-out;
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::before, .nav-link.active::before {
+            width: 100%;
+            left: 0;
+            transform: translateX(0%);
+        }
+        body.light .nav-link:hover {
+            color: #1A535C; /* Darker text on hover for light mode */
+        }
+        body.dark .nav-link:hover {
+            color: #FFFFFF; /* Lighter text on hover for dark mode */
+        }
+
+        /* Theme-specific styles for main elements */
+        body.light .header-bg { background-color: rgba(255, 255, 255, 0.7); border-bottom-color: #FF6F61; } /* joyful-coral */
+        body.dark .header-bg { background-color: rgba(26, 83, 92, 0.7); border-bottom-color: #2EC4B6; } /* joyful-deep-blue with opacity */
+
+        body.light .header-text { color: #1A535C; } /* joyful-deep-blue */
+        body.dark .header-text { color: #F8F4E3; } /* joyful-cream */
+
+        body.light .nav-text { color: #1A535C; } /* joyful-deep-blue */
+        body.dark .nav-text { color: #F8F4E3; } /* joyful-cream */
+
+        body.light .section-card {
+            background-color: rgba(248, 244, 227, 0.8); /* joyful-cream with opacity */
+            border: 1px solid rgba(248, 244, 227, 0.3); /* joyful-cream with opacity */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease;
+        }
+        body.dark .section-card {
+            background-color: rgba(26, 83, 92, 0.8); /* joyful-deep-blue with opacity */
+            border: 1px solid rgba(46, 196, 182, 0.3); /* joyful-teal with opacity */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease;
+        }
+        /* New hover effect for section-card with joyful-yellow border */
+        .section-card:hover {
+            border-color: #FFB54A; /* joyful-yellow */
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12), 0 6px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        body.light .section-heading-text { color: #1A535C; } /* joyful-deep-blue */
+        body.dark .section-heading-text { color: #F8F4E3; } /* joyful-cream */
+
+        body.light .section-subheading-text { color: #FFB54A; } /* joyful-yellow */
+        body.dark .section-subheading-text { color: #2EC4B6; } /* joyful-teal */
+
+        body.light .normal-text { color: #1A535C; } /* joyful-deep-blue */
+        body.dark .normal-text { color: #F8F4E3; } /* joyful-cream */
+
+        body.light .muted-text { color: #FF6F61; } /* joyful-coral */
+        body.dark .muted-text { color: #2EC4B6; } /* joyful-teal */
+
+        body.light .link-text { color: #FFB54A; } /* joyful-yellow */
+        body.dark .link-text { color: #FFB54A; } /* joyful-yellow */
+
+        body.light .accordion-item { background-color: rgba(248, 244, 227, 0.7); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); } /* joyful-cream with opacity */
+        body.dark .accordion-item { background-color: rgba(26, 83, 92, 0.7); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); } /* joyful-deep-blue with opacity */
+        body.light .accordion-item:hover { background-color: rgba(248, 244, 227, 0.9); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
+        body.dark .accordion-item:hover { background-color: rgba(26, 83, 92, 0.9); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25); }
+
+        body.light .accordion-header { background-color: rgba(248, 244, 227, 0.9); } /* joyful-cream with opacity */
+        body.dark .accordion-header { background-color: rgba(26, 83, 92, 0.9); } /* joyful-deep-blue with opacity */
+        body.light .accordion-header:hover { background-color: #FFB54A; } /* joyful-yellow */
+        body.dark .accordion-header:hover { background-color: #2EC4B6; } /* joyful-teal */
+
+        body.light .inner-card { background-color: #F8F4E3; border-color: #FF6F61; } /* joyful-cream, joyful-coral */
+        body.dark .inner-card { background-color: #1A535C; border-color: #2EC4B6; } /* joyful-deep-blue, joyful-teal */
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        body.light .chart-container { background-color: rgba(248, 244, 227, 0.7); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); border-color: rgba(248, 244, 227, 0.3); }
+        body.dark .chart-container { background-color: rgba(26, 83, 92, 0.7); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); border-color: rgba(46, 196, 182, 0.3); }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .project-link-btn {
+            background-color: #2EC4B6; /* joyful-teal */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+        }
+        .project-link-btn:hover {
+            background-color: #1A535C; /* joyful-deep-blue */
+            transform: translateY(-1px);
+        }
+        .project-link-btn:active {
+            transform: translateY(0);
+        }
+        .theme-toggle-btn {
+            background-color: transparent;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+            padding: 0.5rem; /* Add some padding around the icon */
+            border-radius: 9999px; /* Make it circular */
+        }
+        .theme-toggle-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05); /* Light hover effect for light mode */
+            transform: scale(1.1);
+        }
+        body.dark .theme-toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* Darker hover effect for dark mode */
+        }
+
+        /* Color adjustments for Chart.js in dark mode */
+        body.dark canvas {
+            background-color: rgba(26, 83, 92, 0.7); /* Match chart container background */
+        }
+
+        /* Floating animation for profile picture */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .profile-pic-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="light">
+
+    <header class="header-bg backdrop-blur-md shadow-lg sticky top-0 z-50 border-b">
+        <nav class="container mx-auto px-6 py-4 flex justify-center items-center">
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#summary" class="nav-link text-lg font-heading font-medium nav-text py-1">Introduction</a>
+                <a href="#skills" class="nav-link text-lg font-heading font-medium nav-text py-1">Skills & Expertise</a>
+                <a href="#experience" class="nav-link text-lg font-heading font-medium nav-text py-1">Projects & Experience</a>
+                <a href="#education" class="nav-link text-lg font-heading font-medium nav-text py-1">Education & Certs</a>
+                <a href="#contact" class="nav-link text-lg font-heading font-medium nav-text py-1">Contact Me</a>
+                <button id="theme-toggle" class="theme-toggle-btn ml-4">
+                    <span id="theme-icon">🌙</span>
+                </button>
+            </div>
+            <div class="md:hidden flex items-center">
+                <select id="mobile-nav" class="bg-white border border-gray-300 rounded-md py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-joyful-yellow">
+                    <option value="#summary">Introduction</option>
+                    <option value="#skills">Skills & Expertise</option>
+                    <option value="#experience">Projects & Experience</option>
+                    <option value="#education">Education & Certs</option>
+                    <option value="#contact">Contact Me</option>
+                </select>
+                <button id="theme-toggle-mobile" class="theme-toggle-btn ml-4">
+                    <span id="theme-icon-mobile">🌙</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-8">
+
+        <section id="summary" class="py-16 text-center section-card mb-12" data-aos="fade-up" data-aos-duration="1000">
+            <img src="https://avatars.githubusercontent.com/u/117062554?v=4" alt="Atharv Shete Profile Picture" class="w-32 h-32 rounded-full mx-auto mb-6 object-cover shadow-lg border-4 border-white profile-pic-float">
+            <h1 class="text-5xl font-heading font-bold section-heading-text mb-6">Hello, I'm Atharv Shete</h1>
+            <h2 class="text-3xl font-heading font-semibold section-subheading-text mb-8">Electronics & Telecommunication Engineer</h2>
+            <p class="max-w-3xl mx-auto text-xl normal-text leading-relaxed">
+                An Electronics and Telecommunication graduate aspiring for a Software Engineering career, with a solid foundation in programming, embedded systems, and software principles. I am a quick learner, a strong team collaborator, and an analytical thinker, eager to contribute to innovative projects.
+            </p>
+            <div class="mt-12 text-lg muted-text space-y-2">
+                <p>Pune, Maharashtra, India</p>
+                <p>+91-9075704294 &bull; atharvashete0110@gmail.com</p>
+                <p><a href="https://linkedin.com/in/atharv-shete-488491236" target="_blank" class="link-text hover:underline">LinkedIn Profile</a> &bull; <a href="https://github.com/atharvshete0110" target="_blank" class="link-text hover:underline">GitHub Profile</a></p>
+            </div>
+        </section>
+
+        <div class="border-t border-gray-300 my-12"></div>
+
+        <section id="skills" class="py-16 section-card mb-12" data-aos="fade-up" data-aos-duration="1000">
+            <h2 class="text-3xl font-heading font-bold text-center section-heading-text mb-8">Skills & Expertise</h2>
+            <p class="text-center normal-text mb-12 max-w-2xl mx-auto">Discover my core competencies and technical proficiencies. The chart below highlights key areas, and detailed lists provide further insight into my diverse skillset.</p>
+
+            <div class="chart-container mb-16" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="200">
+                <canvas id="skillsChart"></canvas>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 text-left p-6">
+                <div class="inner-card p-6 rounded-xl shadow-md border" data-aos="fade-right" data-aos-duration="1000">
+                    <h3 class="text-xl font-heading font-semibold section-subheading-text mb-4">Programming & Protocols</h3>
+                    <ul class="space-y-2 normal-text">
+                        <li>Embedded C</li>
+                        <li>C++</li>
+                        <li>Python</li>
+                        <li>JavaScript</li>
+                        <li>MySQL</li>
+                        <li>UART</li>
+                        <li>SPI</li>
+                        <li>I2C</li>
+                        <li>Wi-Fi (ESP-NOW, MQTT basics)</li>
+                        <li>OOP</li>
+                        <li>Data Structures</li>
+                        <li>REST APIs</li>
+                        <li>SDLC</li>
+                        <li>Agile</li>
+                    </ul>
+                </div>
+                <div class="inner-card p-6 rounded-xl shadow-md border" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
+                    <h3 class="text-xl font-heading font-semibold section-subheading-text mb-4">Systems & Tools</h3>
+                    <ul class="space-y-2 normal-text">
+                        <li>ESP32</li>
+                        <li>Arduino Uno</li>
+                        <li>NodeMCU</li>
+                        <li>ATmega328P</li>
+                        <li>VS Code</li>
+                        <li>Git</li>
+                        <li>Firebase</li>
+                        <li>AWS EC2</li>
+                        <li>Arduino IDE</li>
+                        <li>PlatformIO</li>
+                        <li>Proteus</li>
+                        <li>KiCad</li>
+                        <li>Postman</li>
+                        <li>Linux (Ubuntu), Windows OS</li>
+                    </ul>
+                </div>
+                <div class="inner-card p-6 rounded-xl shadow-md border" data-aos="fade-left" data-aos-duration="1000">
+                    <h3 class="text-xl font-heading font-semibold section-subheading-text mb-4">Professional & Interpersonal</h3>
+                    <ul class="space-y-2 normal-text">
+                        <li>Teamwork</li>
+                        <li>Time management</li>
+                        <li>Feedback-driven growth</li>
+                        <li>Quick learning</li>
+                        <li>Short-term task focus</li>
+                        <li>Analytical thinker</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="border-t border-gray-300 my-12"></div>
+
+        <section id="experience" class="py-16 section-card mb-12" data-aos="fade-up" data-aos-duration="1000">
+            <h2 class="text-3xl font-heading font-bold text-center section-heading-text mb-8">Projects & Experience</h2>
+            <p class="text-center normal-text mb-12 max-w-2xl mx-auto">Explore my hands-on experience through my professional internship and significant academic projects. Click on any title to expand and view detailed accomplishments and responsibilities.</p>
+            <div id="accordion-container" class="max-w-4xl mx-auto space-y-4">
+
+                <div class="accordion-item rounded-xl shadow-md overflow-hidden" data-aos="fade-right" data-aos-duration="800">
+                    <div class="accordion-header cursor-pointer p-6 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors duration-200">
+                        <div>
+                            <h3 class="font-heading font-semibold text-lg section-subheading-text">Software Intern @ Age Industries Pvt. Ltd.</h3>
+                            <p class="text-sm muted-text">Jul 2024 – Nov 2024</p>
+                        </div>
+                        <div class="accordion-icon text-joyful-yellow text-2xl font-bold">+</div>
+                    </div>
+                    <div class="accordion-content hidden">
+                        <div class="p-6 border-t border-gray-100">
+                            <ul class="list-disc list-inside space-y-3 normal-text project-description">
+                                <li>Developed Python tools for embedded log analysis, reducing processing time by 40%.</li>
+                                <li>Managed firmware version control using Git.</li>
+                                <li>Interfaced various sensors with ESP32 microcontrollers and integrated data into dashboards.</li>
+                            </ul>
+                            <div class="mt-4 flex items-center justify-end">
+                                <a href="https://example.com/software-intern" target="_blank" class="project-link-btn">View More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item rounded-xl shadow-md overflow-hidden" data-aos="fade-left" data-aos-duration="800" data-aos-delay="100">
+                    <div class="accordion-header cursor-pointer p-6 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors duration-200">
+                        <div>
+                            <h3 class="font-heading font-semibold text-lg section-subheading-text">Smart Autonomous Luggage Carrier Robot</h3>
+                            <p class="text-sm muted-text">Academic Project</p>
+                        </div>
+                        <div class="accordion-icon text-joyful-yellow text-2xl font-bold">+</div>
+                    </div>
+                    <div class="accordion-content hidden">
+                        <div class="p-6 border-t border-gray-100">
+                            <ul class="list-disc list-inside space-y-3 normal-text project-description">
+                                <li>Developed an autonomous tracking system using ESP32, Firebase, and Python.</li>
+                                <li>Implemented real-time object detection with center coordinate tracking.</li>
+                                <li>Utilized ultrasonic sensors, PWM, and ISR for precise control.</li>
+                                <li>Achieved an impressive 95% tracking accuracy.</li>
+                            </ul>
+                            <div class="mt-4 flex items-center justify-end">
+                                <a href="https://example.com/luggage-robot" target="_blank" class="project-link-btn">View Project</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item rounded-xl shadow-md overflow-hidden" data-aos="fade-right" data-aos-duration="800" data-aos-delay="200">
+                    <div class="accordion-header cursor-pointer p-6 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors duration-200">
+                        <div>
+                            <h3 class="font-heading font-semibold text-lg section-subheading-text">Dual-Axis Solar Tracker with MPPT and BMS</h3>
+                            <p class="text-sm muted-text">Academic Project</p>
+                        </div>
+                        <div class="accordion-icon text-joyful-yellow text-2xl font-bold">+</div>
+                    </div>
+                    <div class="accordion-content hidden">
+                        <div class="p-6 border-t border-gray-100">
+                            <ul class="list-disc list-inside space-y-3 normal-text project-description">
+                                <li>Designed a microcontroller-based solar tracking system with analog Maximum Power Point Tracking (MPPT).</li>
+                                <li>Engineered a buck converter and implemented the Perturb & Observe MPPT algorithm.</li>
+                                <li>Integrated a Li-ion Battery Management System (BMS) with cell balancing and an OLED display.</li>
+                                <li>Provided manual override capabilities and real-time data synchronization.</li>
+                            </ul>
+                            <div class="mt-4 flex items-center justify-end">
+                                <a href="https://example.com/solar-tracker" target="_blank" class="project-link-btn">View Project</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item rounded-xl shadow-md overflow-hidden" data-aos="fade-left" data-aos-duration="800" data-aos-delay="300">
+                    <div class="accordion-header cursor-pointer p-6 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors duration-200">
+                        <div>
+                            <h3 class="font-heading font-semibold text-lg section-subheading-text">Sensor Data Logger</h3>
+                            <p class="text-sm muted-text">Academic Project</p>
+                        </div>
+                        <div class="accordion-icon text-joyful-yellow text-2xl font-bold">+</div>
+                    </div>
+                    <div class="accordion-content hidden">
+                        <div class="p-6 border-t border-gray-100">
+                            <ul class="list-disc list-inside space-y-3 normal-text project-description">
+                                <li>Logged DHT11 sensor data to an SD card and OLED display using Arduino Uno.</li>
+                                <li>Utilized SPI, I2C, and non-blocking code for efficient parallel logging.</li>
+                                <li>Incorporated capacitor backup to handle power fluctuations, ensuring data integrity.</li>
+                            </ul>
+                            <div class="mt-4 flex items-center justify-end">
+                                <a href="https://example.com/data-logger" target="_blank" class="project-link-btn">View Project</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item rounded-xl shadow-md overflow-hidden" data-aos="fade-right" data-aos-duration="800" data-aos-delay="400">
+                    <div class="accordion-header cursor-pointer p-6 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors duration-200">
+                        <div>
+                            <h3 class="font-heading font-semibold text-lg section-subheading-text">Real-Time Object Detection Web App</h3>
+                            <p class="text-sm muted-text">Academic Project</p>
+                        </div>
+                        <div class="accordion-icon text-joyful-yellow text-2xl font-bold">+</div>
+                    </div>
+                    <div class="accordion-content hidden">
+                        <div class="p-6 border-t border-gray-100">
+                            <ul class="list-disc list-inside space-y-3 normal-text project-description">
+                                <li>Developed a browser-based object detection application using COCO-SSD and TensorFlow.js.</li>
+                                <li>Achieved 15+ FPS object detection in real-time camera streams.</li>
+                                <li>Implemented configurable filters with bounding box overlay for enhanced usability.</li>
+                            </ul>
+                            <div class="mt-4 flex items-center justify-end">
+                                <a href="https://example.com/object-detection" target="_blank" class="project-link-btn">View Project</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <div class="border-t border-gray-300 my-12"></div>
+
+        <section id="education" class="py-16 section-card mb-12" data-aos="fade-up" data-aos-duration="1000">
+            <h2 class="text-3xl font-heading font-bold text-center section-heading-text mb-8">Education & Certifications</h2>
+            <p class="text-center normal-text mb-12 max-w-2xl mx-auto">A comprehensive overview of my academic background and professional certifications.</p>
+
+            <div class="max-w-2xl mx-auto space-y-8">
+                <div class="inner-card p-8 rounded-xl shadow-md border text-center" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="100">
+                    <h3 class="text-2xl font-heading font-semibold section-subheading-text mb-2">B.E. Electronics and Telecommunication Engineering</h3>
+                    <p class="text-lg normal-text mt-1">Govt. College of Engineering and Research, Pune</p>
+                    <p class="text-md muted-text mt-2">Expected Graduation: 2025</p>
+                    <p class="text-md muted-text mt-2">CGPA: 7.08/10</p>
+                </div>
+
+                <div class="inner-card p-8 rounded-xl shadow-md border text-center" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="200">
+                    <h3 class="text-2xl font-heading font-semibold section-subheading-text mb-2">HSC Maharashtra State Board</h3>
+                    <p class="text-lg normal-text mt-1">Loknete Subrao Kadam Junior College of Science, Satara</p>
+                    <p class="text-md muted-text mt-2">2020-2022</p>
+                    <p class="text-md muted-text mt-2">Percentage: 82%</p>
+                </div>
+
+                <div class="inner-card p-8 rounded-xl shadow-md border text-center" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="300">
+                    <h3 class="text-2xl font-heading font-semibold section-subheading-text mb-2">Certifications</h3>
+                    <ul class="list-none space-y-2 normal-text mt-4">
+                        <li>&#10003; Ford Embedded Systems Development Training</li>
+                        <li>&#10003; DSA in Python (50 Days) - Udemy</li>
+                    </ul>
+                </div>
+
+                <div class="inner-card p-8 rounded-xl shadow-md border text-center" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="400">
+                    <h3 class="text-2xl font-heading font-semibold section-subheading-text mb-2">Extra-Curricular</h3>
+                    <ul class="list-none space-y-2 normal-text mt-4">
+                        <li>&#10003; Built ESP32-based biometric attendance system</li>
+                        <li>&#10003; Finalist: Smart India Hackathon 2024 (IoT + Cloud alerting smart tracking)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="border-t border-gray-300 my-12"></div>
+
+        <section id="contact" class="py-16 section-card mb-12" data-aos="fade-up" data-aos-duration="1000">
+            <h2 class="text-3xl font-heading font-bold text-center section-heading-text mb-8">Contact Me</h2>
+            <p class="text-center normal-text mb-12 max-w-2xl mx-auto">
+                Have a question, a project idea, or just want to connect? Fill out the form below, and I'll get back to you as soon as possible!
+            </p>
+
+            <div class="max-w-xl mx-auto p-8 rounded-xl shadow-lg border inner-card" data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="200">
+                <form action="https://formspree.io/f/YOUR_FORMSPREE_FORM_ID" method="POST" class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-lg font-semibold normal-text mb-2">Name:</label>
+                        <input type="text" id="name" name="name" required
+                               class="w-full p-3 border rounded-md shadow-sm focus:ring-2 focus:ring-joyful-yellow focus:border-transparent transition-all duration-200
+                               bg-white text-gray-800 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-lg font-semibold normal-text mb-2">Email:</label>
+                        <input type="email" id="email" name="email" required
+                               class="w-full p-3 border rounded-md shadow-sm focus:ring-2 focus:ring-joyful-yellow focus:border-transparent transition-all duration-200
+                               bg-white text-gray-800 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600">
+                    </div>
+                    <div>
+                        <label for="message" class="block text-lg font-semibold normal-text mb-2">Message:</label>
+                        <textarea id="message" name="message" rows="5" required
+                                  class="w-full p-3 border rounded-md shadow-sm focus:ring-2 focus:ring-joyful-yellow focus:border-transparent transition-all duration-200
+                                  bg-white text-gray-800 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"></textarea>
+                    </div>
+                    <button type="submit"
+                            class="w-full bg-joyful-teal text-white py-3 px-6 rounded-md font-semibold text-lg
+                                   hover:bg-joyful-deep-blue focus:outline-none focus:ring-2 focus:ring-joyful-yellow
+                                   focus:ring-offset-2 transition-colors duration-300 shadow-md">
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16 py-8">
+        <div class="container mx-auto p-6 text-center text-sm">
+            <p>&copy; 2025 Atharv Shete. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- AOS Animate On Scroll JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize AOS
+            AOS.init({
+                once: true, // Whether animation should happen only once - while scrolling down
+            });
+
+            let skillsChart;
+
+            const getChartColors = (isDarkMode) => {
+                return {
+                    gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                    tickColor: isDarkMode ? '#F8F4E3' : '#1A535C', // joyful-cream for dark mode, joyful-deep-blue for light mode
+                    barBackgroundColor: isDarkMode ? 'rgba(46, 196, 182, 0.8)' : 'rgba(46, 196, 182, 0.7)', // joyful-teal
+                    barBorderColor: isDarkMode ? 'rgba(46, 196, 182, 1)' : 'rgba(46, 196, 182, 1)',
+                    tooltipBg: isDarkMode ? 'rgba(26, 83, 92, 0.9)' : 'rgba(26, 83, 92, 0.9)', // joyful-deep-blue with opacity
+                    tooltipTitle: '#F8F4E3', // joyful-cream
+                    tooltipBody: '#FFB54A', // joyful-yellow
+                    tooltipBorder: '#FF6F61' // joyful-coral
+                };
+            };
+
+            const updateChartColors = (isDarkMode) => {
+                const colors = getChartColors(isDarkMode);
+                if (skillsChart) {
+                    skillsChart.options.scales.x.grid.color = colors.gridColor;
+                    skillsChart.options.scales.x.ticks.color = colors.tickColor;
+                    skillsChart.options.scales.y.grid.color = isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)';
+                    skillsChart.options.scales.y.ticks.color = colors.tickColor;
+                    skillsChart.data.datasets[0].backgroundColor = colors.barBackgroundColor;
+                    skillsChart.data.datasets[0].borderColor = colors.barBorderColor;
+                    skillsChart.options.plugins.tooltip.backgroundColor = colors.tooltipBg;
+                    skillsChart.options.plugins.tooltip.titleColor = colors.tooltipTitle;
+                    skillsChart.options.plugins.tooltip.bodyColor = colors.tooltipBody;
+                    skillsChart.options.plugins.tooltip.borderColor = colors.tooltipBorder;
+                    skillsChart.update();
+                }
+            };
+
+            const applyTheme = (theme) => {
+                document.body.classList.remove('light', 'dark');
+                document.body.classList.add(theme);
+                localStorage.setItem('theme', theme);
+
+                const isDarkMode = theme === 'dark';
+                document.getElementById('theme-icon').textContent = isDarkMode ? '☀️' : '🌙';
+                document.getElementById('theme-icon-mobile').textContent = isDarkMode ? '☀️' : '🌙';
+                updateChartColors(isDarkMode);
+            };
+
+            // Initialize Chart.js
+            const skillsChartCtx = document.getElementById('skillsChart').getContext('2d');
+            skillsChart = new Chart(skillsChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Embedded C', 'Python', 'JavaScript', 'ESP32', 'KiCad', 'Proteus', 'Firebase', 'Data Structures', 'Git', 'IoT', 'Real-Time Systems'],
+                    datasets: [{
+                        label: 'Proficiency Level',
+                        data: [95, 90, 80, 92, 85, 88, 80, 85, 90, 88, 85],
+                        borderRadius: 5,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                }
+                            },
+                            grid: {}
+                        },
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                font: { family: 'Inter', size: 14 }
+                            },
+                            grid: {}
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.raw;
+                                    let proficiency = 'Beginner';
+                                    if (value >= 90) proficiency = 'Expert';
+                                    else if (value >= 75) proficiency = 'Advanced';
+                                    else if (value >= 60) proficiency = 'Intermediate';
+                                    return `Proficiency: ${proficiency} (${value}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Set initial theme from localStorage or default to light
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+
+            // Theme toggle event listeners
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                applyTheme(newTheme);
+            });
+            document.getElementById('theme-toggle-mobile').addEventListener('click', () => {
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                applyTheme(newTheme);
+            });
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+
+                header.addEventListener('click', () => {
+                    const isVisible = !content.classList.contains('hidden');
+
+                    // Close all other accordions
+                    document.querySelectorAll('.accordion-content').forEach(c => c.classList.add('hidden'));
+                    document.querySelectorAll('.accordion-icon').forEach(i => {
+                        i.textContent = '+';
+                        i.style.transform = 'rotate(0deg)';
+                    });
+
+                    // Toggle current accordion
+                    if (isVisible) {
+                        content.classList.add('hidden');
+                        icon.textContent = '-';
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        content.classList.remove('hidden');
+                        icon.textContent = '+';
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    if (pageYOffset >= sectionTop - 200 && pageYOffset < sectionTop + sectionHeight - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (event) => {
+                window.location.hash = event.target.value;
+            });
+        });
+    </script>
+
+</body>
+</html>
